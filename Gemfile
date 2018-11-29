@@ -1,4 +1,6 @@
-source 'https://www.rubygems.org'
+source "https://rubygems.org"
 
-gem 'ib-ruby', git: 'https://github.com/cmer/ib-ruby.git'
-gem 'xmlhasher'
+git_source(:github) {|repo_name| "https://github.com/#{repo_name}" }
+
+# Specify your gem's dependencies in interactive_brokers_2_tasty_works.gemspec
+gemspec

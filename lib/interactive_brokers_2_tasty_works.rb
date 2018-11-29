@@ -1,19 +1,18 @@
+require "interactive_brokers_2_tasty_works/version"
+
 require 'csv'
 require 'json'
 require 'xmlhasher'
+require 'bigdecimal'
+require 'active_support/core_ext/time/zones'
 
-class NilClass
-  def empty?; true; end
+unless NilClass.method_defined?(:empty?)
+  class NilClass
+    def empty?; true; end
+  end
 end
 
-class IbToTw
-  # Interactive Brokers to TastyWorks converter
-  #
-  # Example:
-  #
-  #   IbToTw.new(input_path: '~/trades.xml').save_as("/tmp/trades.csv")
-  #
-
+class InteractiveBrokers2TastyWorks
   attr_reader :input_path, :file_format
 
   OUTPUT_HEADER = ['Date', 'Type', 'Action', 'Symbol', 'Instrument Type', 'Description', 'Value', 'Quantity',
@@ -65,10 +64,10 @@ class IbToTw
         trade[:symbol],
         Utils.build_instrument_type(trade),
         Utils.build_description(trade),
-        trade[:tradeMoney],
+        Utils.build_value(trade),
         trade[:quantity],
         trade[:tradePrice],
-        trade[:ibCommission],
+        Utils.build_commission(trade),
         '',
         trade[:multiplier],
         trade[:underlyingSymbol],
@@ -105,11 +104,11 @@ class IbToTw
         hour = t[0..1]
         min = t[2..3]
         sec = t[4..5]
-        Time.new(year,month,day,hour,min,sec).strftime('%FT%T%z')
+        Time.zone.local(year,month,day,hour,min,sec).strftime('%FT%T%z')
       end
 
       def build_date(str)
-        return '' if str.to_s.strip == ''
+        return nil if str.to_s.strip == ''
         day = str[6..7]
         month = str[4..5]
         year = str[2..3]
@@ -150,8 +149,18 @@ class IbToTw
         str
       end
 
+      def build_value(trade)
+        v = trade[:proceeds]
+        v.to_f == -0.0 ? '0' : v
+      end
+
+      def build_commission(trade)
+        c = trade[:ibCommission]
+        c.to_f == -0.0 ? '0' : c
+      end
+
       def put_or_call(trade)
-        return '' unless trade[:assetCategory] == 'OPT'
+        return nil unless trade[:assetCategory] == 'OPT'
         trade[:putCall] == 'P' ? 'PUT' : 'CALL'
       end
     end
