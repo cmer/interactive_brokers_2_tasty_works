@@ -1,0 +1,8 @@
+ib_api:
+  host: 127.0.0.1
+  port: 7496
+  query_id: 123456
+  token: 123456789012345678901234
+  statement_generation_delay: 15
+  statement_trigger_delay: 300
+  fetch_timer: 3600
