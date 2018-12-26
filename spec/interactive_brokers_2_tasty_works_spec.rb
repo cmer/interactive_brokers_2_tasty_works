@@ -1,6 +1,8 @@
 require 'active_support/core_ext/time/zones'
 require_relative File.join('..', 'lib', 'interactive_brokers_2_tasty_works')
 
+require 'tempfile'
+
 RSpec.describe InteractiveBrokers2TastyWorks do
   def val(trade, column)
     columns = { date: 0, type: 1, action: 2, symbol: 3, instrument_type: 4, description: 5, value: 6, qty: 7, avg_price: 8,
@@ -23,7 +25,7 @@ RSpec.describe InteractiveBrokers2TastyWorks do
     ib2tw = InteractiveBrokers2TastyWorks.new(input_path: input_file_xml)
     output = ib2tw.output
 
-    # expect(output.size).to eq(47)        # 46 trades + 1 header line
+    expect(output.size).to eq(8)         # 7 trades + 1 header line
     expect(output.first.size).to eq(16)  # 16 columns
     expect(output.last.size).to eq(16)   # 16 columns
 
@@ -118,5 +120,11 @@ RSpec.describe InteractiveBrokers2TastyWorks do
     expect(val(trade, :expiration)).to eq '10/19/18'
     expect(val(trade, :strike)).to eq '250'
     expect(val(trade, :put_call)).to eq 'PUT'
+
+    # Output file format is valid
+    ib2tw.save_as(tmp_output = Tempfile.new.path)
+    expected = File.read(File.join(File.expand_path(File.dirname(__FILE__)), 'samples/output.csv').to_s)
+    actual   = File.read(tmp_output)
+    expect(actual).to eq(expected)
   end
 end
