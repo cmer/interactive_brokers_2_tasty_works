@@ -5,7 +5,7 @@ This library converts the output of an Interactive Brokers Execution Flex Query 
 ### Flex Query Parameters in Interactive Brokers
 
 - Leave all defaults
-- Set time period to LAST 365 DAYS
+- Set time period to LAST 365 DAYS (or whatever you want, really)
 - In Sections, select Trades
     + Select Executions
     + Select All
