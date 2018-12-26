@@ -1,4 +1,5 @@
 require 'active_support/core_ext/time/zones'
+require_relative File.join('..', 'lib', 'interactive_brokers_2_tasty_works')
 
 RSpec.describe InteractiveBrokers2TastyWorks do
   def val(trade, column)
