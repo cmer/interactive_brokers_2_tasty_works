@@ -48,7 +48,6 @@ class InteractiveBrokers2TastyWorks
 
   def convert!
     output = [add_output_headers ? (OUTPUT_HEADER + add_output_headers) : OUTPUT_HEADER]
-    # require 'byebug';byebug
 
     trades = if data_hash[:FlexQueryResponse].is_a?(Array)
       data_hash[:FlexQueryResponse][1][:FlexStatements][1][:FlexStatement][1][:Trades][:Trade]
