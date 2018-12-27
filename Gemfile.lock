@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    interactive_brokers_2_tasty_works (0.1.0)
+    interactive_brokers_2_tasty_works (0.2.0)
       activesupport
       xmlhasher
 
@@ -53,4 +53,4 @@ DEPENDENCIES
   rspec (~> 3.0)
 
 BUNDLED WITH
-   1.16.4
+   1.17.1
