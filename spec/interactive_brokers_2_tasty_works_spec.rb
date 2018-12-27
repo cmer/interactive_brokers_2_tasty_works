@@ -127,4 +127,52 @@ RSpec.describe InteractiveBrokers2TastyWorks do
     actual   = File.read(tmp_output)
     expect(actual).to eq(expected)
   end
+
+  it 'allows adding additional fields to the output with an array of keys' do
+    extra_fields = %w(ibExecID ibOrderID)
+    ib2tw = InteractiveBrokers2TastyWorks.new(input_path: input_file_xml, add_output: extra_fields)
+    output = ib2tw.output
+
+    expect(output.size).to eq(8)         # 7 trades + 1 header line
+    expect(output.first.size).to eq(18)  # 16 columns
+    expect(output.last.size).to eq(18)   # 16 columns
+
+    expect(output.first).to eq (InteractiveBrokers2TastyWorks::OUTPUT_HEADER + ['ibExecID', 'ibOrderID'])
+
+    trade = output[1]
+    expect(trade[-2]).to eq nil
+    expect(trade[-1]).to eq '406730108'
+
+    trade = output[2]
+    expect(trade[-2]).to eq '00013d66.5bf526b9.01.01'
+    expect(trade[-1]).to eq '45910827'
+
+    trade = output[3]
+    expect(trade[-2]).to eq '0000ed50.5bd152fe.01.01'
+    expect(trade[-1]).to eq '44843833'
+  end
+
+  it 'allows adding additional fields to the output with a hash' do
+    extra_fields = { ibExecID: 'IB Execution ID', ibOrderID: 'IB Order ID' }
+    ib2tw = InteractiveBrokers2TastyWorks.new(input_path: input_file_xml, add_output: extra_fields)
+    output = ib2tw.output
+
+    expect(output.size).to eq(8)         # 7 trades + 1 header line
+    expect(output.first.size).to eq(18)  # 16 columns
+    expect(output.last.size).to eq(18)   # 16 columns
+
+    expect(output.first).to eq (InteractiveBrokers2TastyWorks::OUTPUT_HEADER + extra_fields.values)
+
+    trade = output[1]
+    expect(trade[-2]).to eq nil
+    expect(trade[-1]).to eq '406730108'
+
+    trade = output[2]
+    expect(trade[-2]).to eq '00013d66.5bf526b9.01.01'
+    expect(trade[-1]).to eq '45910827'
+
+    trade = output[3]
+    expect(trade[-2]).to eq '0000ed50.5bd152fe.01.01'
+    expect(trade[-1]).to eq '44843833'
+  end
 end

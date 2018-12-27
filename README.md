@@ -30,6 +30,16 @@ Or install it yourself as:
 
 `InteractiveBrokers2TastyWorks.new(input_path: '~/trades.xml').save_as("/tmp/trades.csv")`
 
+### Adding additional fields to the output (non standard output format)
+
+```
+InteractiveBrokers2TastyWorks.new(input_path: '~/trades.xml', add_output: ['ibExecID', 'ibOrderID'])
+
+# or to specify a different header for the additional fields
+
+InteractiveBrokers2TastyWorks.new(input_path: '~/trades.xml', add_output: { ibExecID: 'IB Execution ID', ibOrderID: 'IB Order ID' })
+```
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.

@@ -19,10 +19,11 @@ class InteractiveBrokers2TastyWorks
                    'Average Price', 'Commissions', 'Fees', 'Multiplier', 'Underlying Symbol', 'Expiration Date',
                    'Strike Price', 'Call or Put']
 
-  def initialize(data_hash: nil, input_path: nil, file_format: :xml)
+  def initialize(data_hash: nil, input_path: nil, file_format: :xml, add_output: nil)
     @data_hash   = data_hash
     @input_path  = input_path
     @file_format = file_format
+    @add_output  = add_output
 
     raise ArgumenrError.new("Must specify `data_hash` or `input_path`.") if data_hash.empty? && input_path.empty?
 
@@ -46,7 +47,8 @@ class InteractiveBrokers2TastyWorks
   private
 
   def convert!
-    output = [OUTPUT_HEADER]
+    output = [add_output_headers ? (OUTPUT_HEADER + add_output_headers) : OUTPUT_HEADER]
+    # require 'byebug';byebug
 
     trades = if data_hash[:FlexQueryResponse].is_a?(Array)
       data_hash[:FlexQueryResponse][1][:FlexStatements][1][:FlexStatement][1][:Trades][:Trade]
@@ -75,8 +77,9 @@ class InteractiveBrokers2TastyWorks
         trade[:strike],
         Utils.put_or_call(trade)
       ]
-    end
 
+      output.last.concat(add_output_values(trade)) if add_output_values(trade)
+    end
     output
   end
 
@@ -91,6 +94,34 @@ class InteractiveBrokers2TastyWorks
         :ignore_namespaces => true,
         :string_keys => false
       ).parse(File.new(@input_path))
+    end
+  end
+
+  def add_output_values(trade)
+    return nil unless @add_output.present?
+
+    add_output_fields.map { |f| Utils.indifferent_fetch(trade, f) }
+    # output = []
+    # add_output_fields.each do |f|
+    #   output << trade[f]
+    # end
+
+    # output
+  end
+
+  def add_output_fields
+    if @add_output.is_a?(Hash)
+      @add_output.keys
+    elsif @add_output.is_a?(Array)
+      @add_output
+    end
+  end
+
+  def add_output_headers
+    if @add_output.is_a?(Hash)
+      @add_output.values
+    elsif @add_output.is_a?(Array)
+      @add_output
     end
   end
 
@@ -162,6 +193,12 @@ class InteractiveBrokers2TastyWorks
       def put_or_call(trade)
         return nil unless trade[:assetCategory] == 'OPT'
         trade[:putCall] == 'P' ? 'PUT' : 'CALL'
+      end
+
+      def indifferent_fetch(h, key)
+        h.fetch(key)
+      rescue KeyError
+        h[key.is_a?(String) ? key.to_sym : key.to_s]
       end
     end
   end
