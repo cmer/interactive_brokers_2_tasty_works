@@ -2,7 +2,7 @@
 
 This library converts the output of an Interactive Brokers Execution Flex Query to a TastyWorks-compatible CSV file.
 
-### Flex Query Parameters in Interactive Brokers
+### Activity Flex Query Parameters in Interactive Brokers
 
 - Leave all defaults
 - Set time period to LAST 365 DAYS (or whatever you want, really)
