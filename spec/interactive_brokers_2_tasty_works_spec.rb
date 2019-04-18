@@ -25,7 +25,7 @@ RSpec.describe InteractiveBrokers2TastyWorks do
     ib2tw = InteractiveBrokers2TastyWorks.new(input_path: input_file_xml)
     output = ib2tw.output
 
-    expect(output.size).to eq(8)         # 7 trades + 1 header line
+    expect(output.size).to eq(12)        # 11 trades + 1 header line
     expect(output.first.size).to eq(16)  # 16 columns
     expect(output.last.size).to eq(16)   # 16 columns
 
@@ -121,6 +121,78 @@ RSpec.describe InteractiveBrokers2TastyWorks do
     expect(val(trade, :strike)).to eq '250'
     expect(val(trade, :put_call)).to eq 'PUT'
 
+    trade = output[8]
+    expect(val(trade, :date)).to eq "2018-12-21T16:20:00-0500"
+    expect(val(trade, :type)).to eq "Trade"
+    expect(val(trade, :action)).to eq "BUY_TO_CLOSE"
+    expect(val(trade, :symbol)).to eq "RUT   181221C01480000"
+    expect(val(trade, :instrument_type)).to eq "Equity Option"
+    expect(val(trade, :description)).to eq "Bought 120 RUT   181221C01480000 12/21/18 CALL 1480 @ 0"
+    expect(val(trade, :value)).to eq "0"
+    expect(val(trade, :qty)).to eq "120"
+    expect(val(trade, :avg_price)).to eq "0"
+    expect(val(trade, :commissions)).to eq "0"
+    expect(val(trade, :fees)).to eq ""
+    expect(val(trade, :multiplier)).to eq "100"
+    expect(val(trade, :underlying)).to eq 'RUT'
+    expect(val(trade, :expiration)).to eq '12/21/18'
+    expect(val(trade, :strike)).to eq '1480'
+    expect(val(trade, :put_call)).to eq 'CALL'
+
+    trade = output[9]
+    expect(val(trade, :date)).to eq "2018-12-21T16:20:00-0500"
+    expect(val(trade, :type)).to eq "Trade"
+    expect(val(trade, :action)).to eq "SELL_TO_CLOSE"
+    expect(val(trade, :symbol)).to eq "RUT   181221C01510000"
+    expect(val(trade, :instrument_type)).to eq "Equity Option"
+    expect(val(trade, :description)).to eq "Sold 120 RUT   181221C01510000 12/21/18 CALL 1510 @ 0"
+    expect(val(trade, :value)).to eq "0"
+    expect(val(trade, :qty)).to eq "-120"
+    expect(val(trade, :avg_price)).to eq "0"
+    expect(val(trade, :commissions)).to eq "0"
+    expect(val(trade, :fees)).to eq ""
+    expect(val(trade, :multiplier)).to eq "100"
+    expect(val(trade, :underlying)).to eq 'RUT'
+    expect(val(trade, :expiration)).to eq '12/21/18'
+    expect(val(trade, :strike)).to eq '1510'
+    expect(val(trade, :put_call)).to eq 'CALL'
+
+    trade = output[10]
+    expect(val(trade, :date)).to eq "2018-12-21T16:20:00-0500"
+    expect(val(trade, :type)).to eq "Trade"
+    expect(val(trade, :action)).to eq "SELL_TO_CLOSE"
+    expect(val(trade, :symbol)).to eq "RUT   181221P01435000"
+    expect(val(trade, :instrument_type)).to eq "Equity Option"
+    expect(val(trade, :description)).to eq "Sold 120 RUT   181221P01435000 12/21/18 PUT 1435 @ 108.78"
+    expect(val(trade, :value)).to eq "1305360"
+    expect(val(trade, :qty)).to eq "-120"
+    expect(val(trade, :avg_price)).to eq "108.78"
+    expect(val(trade, :commissions)).to eq "0"
+    expect(val(trade, :fees)).to eq ""
+    expect(val(trade, :multiplier)).to eq "100"
+    expect(val(trade, :underlying)).to eq 'RUT'
+    expect(val(trade, :expiration)).to eq '12/21/18'
+    expect(val(trade, :strike)).to eq '1435'
+    expect(val(trade, :put_call)).to eq 'PUT'
+
+    trade = output[11]
+    expect(val(trade, :date)).to eq "2018-12-21T16:20:00-0500"
+    expect(val(trade, :type)).to eq "Trade"
+    expect(val(trade, :action)).to eq "BUY_TO_CLOSE"
+    expect(val(trade, :symbol)).to eq "RUT   181221P01465000"
+    expect(val(trade, :instrument_type)).to eq "Equity Option"
+    expect(val(trade, :description)).to eq "Bought 120 RUT   181221P01465000 12/21/18 PUT 1465 @ 138.78"
+    expect(val(trade, :value)).to eq "-1665360"
+    expect(val(trade, :qty)).to eq "120"
+    expect(val(trade, :avg_price)).to eq "138.78"
+    expect(val(trade, :commissions)).to eq "0"
+    expect(val(trade, :fees)).to eq ""
+    expect(val(trade, :multiplier)).to eq "100"
+    expect(val(trade, :underlying)).to eq 'RUT'
+    expect(val(trade, :expiration)).to eq '12/21/18'
+    expect(val(trade, :strike)).to eq '1465'
+    expect(val(trade, :put_call)).to eq 'PUT'
+
     # Output file format is valid
     ib2tw.save_as(tmp_output = Tempfile.new.path)
     expected = File.read(File.join(File.expand_path(File.dirname(__FILE__)), 'samples/output.csv').to_s)
@@ -133,7 +205,7 @@ RSpec.describe InteractiveBrokers2TastyWorks do
     ib2tw = InteractiveBrokers2TastyWorks.new(input_path: input_file_xml, add_output: extra_fields)
     output = ib2tw.output
 
-    expect(output.size).to eq(8)         # 7 trades + 1 header line
+    expect(output.size).to eq(12)         # 11 trades + 1 header line
     expect(output.first.size).to eq(18)  # 16 columns
     expect(output.last.size).to eq(18)   # 16 columns
 
@@ -157,7 +229,7 @@ RSpec.describe InteractiveBrokers2TastyWorks do
     ib2tw = InteractiveBrokers2TastyWorks.new(input_path: input_file_xml, add_output: extra_fields)
     output = ib2tw.output
 
-    expect(output.size).to eq(8)         # 7 trades + 1 header line
+    expect(output.size).to eq(12)         # 11 trades + 1 header line
     expect(output.first.size).to eq(18)  # 16 columns
     expect(output.last.size).to eq(18)   # 16 columns
 

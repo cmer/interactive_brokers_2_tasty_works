@@ -25,7 +25,7 @@ class InteractiveBrokers2TastyWorks
     @file_format = file_format
     @add_output  = add_output
 
-    raise ArgumenrError.new("Must specify `data_hash` or `input_path`.") if data_hash.empty? && input_path.empty?
+    raise ArgumentError.new("Must specify `data_hash` or `input_path`.") if data_hash.empty? && input_path.empty?
 
     if !input_path.empty?
       file_format = input_path.split(".").last.to_sym if file_format.empty?
@@ -67,7 +67,7 @@ class InteractiveBrokers2TastyWorks
         Utils.build_description(trade),
         Utils.build_value(trade),
         trade[:quantity],
-        trade[:tradePrice],
+        Utils.build_trade_price(trade),
         Utils.build_commission(trade),
         '',
         trade[:multiplier],
@@ -98,14 +98,7 @@ class InteractiveBrokers2TastyWorks
 
   def add_output_values(trade)
     return nil unless @add_output.present?
-
     add_output_fields.map { |f| Utils.indifferent_fetch(trade, f) }
-    # output = []
-    # add_output_fields.each do |f|
-    #   output << trade[f]
-    # end
-
-    # output
   end
 
   def add_output_fields
@@ -169,9 +162,9 @@ class InteractiveBrokers2TastyWorks
         str += case (ac = trade[:assetCategory])
         when 'OPT'
           exp = build_date(trade[:expiry])
-          "#{trade[:symbol]} #{exp} #{put_or_call(trade)} #{trade[:strike]} @ #{trade[:tradePrice]}"
+          "#{trade[:symbol]} #{exp} #{put_or_call(trade)} #{trade[:strike]} @ #{build_trade_price(trade)}"
         when 'STK'
-          "#{trade[:symbol]} @ #{trade[:tradePrice]}"
+          "#{trade[:symbol]} @ #{build_trade_price(trade)}"
         else
           raise ArgumentError.new("Unknown asset category: #{ac}")
         end
@@ -179,9 +172,25 @@ class InteractiveBrokers2TastyWorks
         str
       end
 
+      def build_trade_price(trade)
+        if string_is_zero?(trade[:tradePrice]) && !string_is_zero?(build_value(trade))
+          value = build_value(trade).to_f
+          strip_zero_decimal (value / trade[:quantity].to_i / trade[:multiplier].to_i).abs
+        else
+          trade[:tradePrice]
+        end
+      end
+
       def build_value(trade)
-        v = trade[:proceeds]
-        v.to_f == -0.0 ? '0' : v
+        if !proceeds_is_zero?(trade)
+          v = trade[:proceeds]
+        elsif is_option_assignment_exercise_or_expiration(trade)
+          v = strip_zero_decimal(trade[:mtmPnl].to_f * -1)
+        else
+          raise ArgumentError.new("Cannot parse trade: #{trade}")
+        end
+
+        (v.to_f == -0.0 ? 0 : v).to_s
       end
 
       def build_commission(trade)
@@ -192,6 +201,23 @@ class InteractiveBrokers2TastyWorks
       def put_or_call(trade)
         return nil unless trade[:assetCategory] == 'OPT'
         trade[:putCall] == 'P' ? 'PUT' : 'CALL'
+      end
+
+      def string_is_zero?(str)
+        str = str.to_s.strip
+        str == '0' || str == '-0'
+      end
+
+      def proceeds_is_zero?(trade)
+        string_is_zero?(trade[:proceeds])
+      end
+
+      def strip_zero_decimal(val)
+        val.to_s.sub(/\.0$/, '')
+      end
+
+      def is_option_assignment_exercise_or_expiration(trade)
+         proceeds_is_zero?(trade) && trade[:transactionType] == "BookTrade" && trade[:notes] =~ /^A$|^Ex$|^Ep$/i
       end
 
       def indifferent_fetch(h, key)
